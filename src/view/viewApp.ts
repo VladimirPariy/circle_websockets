@@ -1,7 +1,7 @@
-const socket = new WebSocket("ws://localhost:3000")
+const socket = new WebSocket("ws://localhost:3000");
 const circle: HTMLElement | null = document.querySelector('.circle');
 
-type Coords = { left: number, top: number }
+type Coords = { left: number, top: number };
 
 
 socket.addEventListener('open', () => {
@@ -11,31 +11,39 @@ socket.addEventListener('open', () => {
 
 if (circle) {
 	
-	circle.addEventListener('mousedown', (e) => {
-		const coords = getCoords(circle)
+	socket.onmessage = (event) => {
+		const coords = JSON.parse(event.data);
+		circle.style.left = coords.x;
+		circle.style.top = coords.y;
+	}
+	
+	circle.onmousedown = (e) => {
+		const coords = getCoords(circle);
+		const cordX = e.pageX - coords.left;
+		const cordY = e.pageY - coords.top;
 		
-		moveAt(e, coords)
+		const moveAt = (e: MouseEvent) => {
+			const x = e.pageX - cordX + 'px';
+			const y = e.pageY - cordY + 'px';
+			socket.send(JSON.stringify({x, y}));
+		}
+		moveAt(e);
 		
-		document.addEventListener('mousemove', (e) => {
-			moveAt(e, coords);
-		})
+		document.onmousemove = (e) => {
+			moveAt(e);
+		}
 		
-		circle.addEventListener('mouseup', () => {
+		circle.onmouseup = () => {
 			document.onmousemove = null;
 			circle.onmouseup = null;
-		})
-	})
-	
-	circle.addEventListener('dragstart', () => {
-		return false;
-	})
-	
-	socket.onmessage = (event) => {
-		const coords = JSON.parse(event.data)
-		circle.style.left = coords.x
-		circle.style.top = coords.y
-		console.log(coords)
+		}
 	}
+	
+	circle.ondragstart = () => {
+		return false;
+	}
+	
+	
 }
 
 const getCoords = (elem: Element): Coords => {
@@ -44,10 +52,5 @@ const getCoords = (elem: Element): Coords => {
 		top: box.top + scrollY,
 		left: box.left + scrollX
 	};
-}
+};
 
-const moveAt = (e: MouseEvent, coords: Coords) => {
-	const x = e.pageX - (e.pageX - coords.left) + 'px';
-	const y = e.pageY - (e.pageY - coords.top) + 'px';
-	socket.send(JSON.stringify({x, y}))
-}

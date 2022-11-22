@@ -1,12 +1,16 @@
 import ws from 'ws';
 
-const {Server} = ws;
-const wss = new Server({port:3000})
+const {Server: Index} = ws;
+const wss = new Index({port: 3000})
+
+let coords = ''
 
 wss.on("connection", (ws) => {
-		ws.on("message", (rawMsg) => {
-			wss.clients.forEach((client) => {
-				client.send(rawMsg.toString())
-			})
+	if(coords.length !== 0 ) ws.send(coords)
+	ws.on("message", (rawMsg) => {
+		wss.clients.forEach((client) => {
+			coords = rawMsg.toString()
+			client.send(rawMsg.toString())
+		})
 	})
 })
