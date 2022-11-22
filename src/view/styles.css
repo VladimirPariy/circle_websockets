@@ -1,0 +1,16 @@
+*{
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+
+.circle{
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	background: red;
+	border-radius: 50%;
+	cursor: grabbing;
+	position: absolute;
+}
+
